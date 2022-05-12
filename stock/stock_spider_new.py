@@ -57,9 +57,7 @@ class CrwalStockName(threading.Thread):
         self.stock_name = stock_name
 
     def run(self):
-        while True:
-            if self.page_queue.empty():
-                break
+        while not self.page_queue.empty():
             url = self.page_queue.get()
             if "funds" not in url:
                 self.parse_page(url)
@@ -75,14 +73,14 @@ class CrwalStockName(threading.Thread):
                                         //p//text()"))
             text2 = html.xpath("//p[@class='zjlxlstj_txt mb14']//\
                                text()")[0].strip()
-            text = text1 + "&" + text2
+            text = f"{text1}&" + text2
             stock_id = str(url).split("/")[-2]
             date = datetime.datetime.now()
-            today = "{}/{}/{}".format(date.year, date.month, date.day)
+            today = f"{date.year}/{date.month}/{date.day}"
             self.stock_name.put((text, stock_id, today))
             time.sleep(random.randint(1, 2))
-        except(Exception):
-            logger.info('{}网页解析失败'.format(url))
+        except Exception:
+            logger.info(f'{url}网页解析失败')
             self.page_queue.put(url)
 
     def parse_page_detail(self, url):
@@ -98,8 +96,8 @@ class CrwalStockName(threading.Thread):
                          date[5], date[6], date[7], date[8], date[9], date[10])
                 self.stock_name.put(value)
                 time.sleep(random.randint(1, 2))
-        except(Exception):
-            logger.info('{}网页解析失败'.format(url))
+        except Exception:
+            logger.info(f'{url}网页解析失败')
             self.page_queue.put(url)
 
 
@@ -121,9 +119,8 @@ class StockNameConsumer(threading.Thread):
 
     def run(self):
         while True:
-            if self.stock_name.empty():
-                if self.page_queue.empty():
-                    return
+            if self.stock_name.empty() and self.page_queue.empty():
+                return
             data = self.stock_name.get()
             print(data)
             if len(data) == 3:
@@ -142,8 +139,8 @@ class StockNameConsumer(threading.Thread):
             cursor = self.connect.cursor()
             cursor.execute(sql, tuple(data))
             self.connect.commit()
-        except(Exception):
-            logger.error('{}数据保存数据库失败'.format(data))
+        except Exception:
+            logger.error(f'{data}数据保存数据库失败')
 
     def save_data_detail(self, data):
         try:
@@ -156,8 +153,8 @@ class StockNameConsumer(threading.Thread):
             cursor = self.connect.cursor()
             cursor.execute(sql, data)
             self.connect.commit()
-        except(Exception):
-            logger.error('{}数据保存数据库失败'.format(data))
+        except Exception:
+            logger.error(f'{data}数据保存数据库失败')
 
 
 def main():
@@ -174,11 +171,11 @@ def main():
         page_queue.put(text_url)
         page_queue.put(detail_url)
 
-    for i in range(2):
+    for _ in range(2):
         t = CrwalStockName(page_queue=page_queue, stock_name=stock_name)
         t.start()
 
-    for i in range(3):
+    for _ in range(3):
         t = StockNameConsumer(page_queue=page_queue, stock_name=stock_name,
                               connect=connect)
         t.start()

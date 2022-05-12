@@ -26,7 +26,17 @@ class JsSpider(CrawlSpider):
         tags = response.xpath('//div[@class="_2Nttfz"]/a//span/text()').getall()
         tags = ','.join(tags)
         origin_url = response.url
-        item = JianshuItem(title=title,author=author,time=time,word_num=word_num,read_num=read_num,
-        content=content,comment_num=comment_num,support_num=support_num,process_url=process_url,article_id=article_id,
-        origin_url=origin_url,tags=tags)
-        return item
+        return JianshuItem(
+            title=title,
+            author=author,
+            time=time,
+            word_num=word_num,
+            read_num=read_num,
+            content=content,
+            comment_num=comment_num,
+            support_num=support_num,
+            process_url=process_url,
+            article_id=article_id,
+            origin_url=origin_url,
+            tags=tags,
+        )

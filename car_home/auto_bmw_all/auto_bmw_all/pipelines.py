@@ -24,7 +24,7 @@ class BmwImagesPipeline(ImagesPipeline):
     def file_path(self, request, response=None, info=None):
         image_file = request.meta['image_file']
         name = request.url.split('_')[-1]
-        return '%s/%s.png'%(image_file,name)
+        return f'{image_file}/{name}.png'
     
     def item_completed(self, results, item, info):
         print(results)

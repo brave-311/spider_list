@@ -10,7 +10,7 @@ class proxy():
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.62 Safari/537.36'
         }
         self.proxy_list = []
-        self.url = [ 'http://www.66ip.cn/{}.html'.format(i) for i in range(20)]
+        self.url = [f'http://www.66ip.cn/{i}.html' for i in range(20)]
 
     def getContent(self):
         '''
@@ -38,8 +38,11 @@ class proxy():
             proxy_style = re.xpath("./td/text()")[3]
             proxy_check_time = re.xpath("./td/text()")[4]
             # 将获取的代理存放至列表中
-            self.proxy_list.append(proxy_ip+'+'+proxy_port+'+'+proxy_address+'+'+proxy_style+'+'+proxy_check_time)
-            proxy_value = proxy_ip+":"+proxy_port
+            self.proxy_list.append(
+                f'{proxy_ip}+{proxy_port}+{proxy_address}+{proxy_style}+{proxy_check_time}'
+            )
+
+            proxy_value = f"{proxy_ip}:{proxy_port}"
             print(proxy_value)
             # 将代理添加至redis数据库中
             r.add(proxy_value)

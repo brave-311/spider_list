@@ -40,13 +40,13 @@ def crawl_stock_company(url, connect):
 if __name__ == "__main__":
     connect = pymysql.connect(host='xxxxx', user='root', password=
                               'xxxxxx', port=3306, db='stock')
-    file = open("new_{}.text".format(time.time()), "w")
+    file = open(f"new_{time.time()}.text", "w")
     for i in range(1, 207):
         try:
             url = "https://s.askci.com/stock/a/0-0?reportTime=2020-03-31&pageNum={}#\
                     QueryCondition".format(i)
             crawl_stock_company(url, connect)
             time.sleep(random.randint(1, 2))
-        except(Exception):
+        except Exception:
             print("股票抓取失败！！！")
-            file.write("股票{}数据未抓取成功!".format(i)+"\n")
+            file.write(f"股票{i}数据未抓取成功!" + "\n")

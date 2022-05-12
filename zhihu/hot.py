@@ -31,8 +31,13 @@ def get_question_num(url,headers):
 def data_json_request(question_id,question_title,headers):
     num = 0
     i = 1
+    sql = 'INSERT INTO zhihu_hot_question(question_title,author_name,author_introduce,author_followers,answer_vote_num,answer_comment_num,updated_time,content) VALUES(%s,%s,%s,%s,%s,%s,%s,%s)'
     while True:
-        json_url = 'https://www.zhihu.com/api/v4/questions/' + question_id + '/answers?include=data%5B%2A%5D.is_normal%2Cadmin_closed_comment%2Creward_info%2Cis_collapsed%2Cannotation_action%2Cannotation_detail%2Ccollapse_reason%2Cis_sticky%2Ccollapsed_by%2Csuggest_edit%2Ccomment_count%2Ccan_comment%2Ccontent%2Ceditable_content%2Cvoteup_count%2Creshipment_settings%2Ccomment_permission%2Ccreated_time%2Cupdated_time%2Creview_info%2Crelevant_info%2Cquestion%2Cexcerpt%2Crelationship.is_authorized%2Cis_author%2Cvoting%2Cis_thanked%2Cis_nothelp%2Cis_labeled%2Cis_recognized%2Cpaid_info%2Cpaid_info_content%3Bdata%5B%2A%5D.mark_infos%5B%2A%5D.url%3Bdata%5B%2A%5D.author.follower_count%2Cbadge%5B%2A%5D.topics&limit=5&offset={}&platform=desktop&sort_by=default'.format(num)
+        json_url = (
+            f'https://www.zhihu.com/api/v4/questions/{question_id}'
+            + f'/answers?include=data%5B%2A%5D.is_normal%2Cadmin_closed_comment%2Creward_info%2Cis_collapsed%2Cannotation_action%2Cannotation_detail%2Ccollapse_reason%2Cis_sticky%2Ccollapsed_by%2Csuggest_edit%2Ccomment_count%2Ccan_comment%2Ccontent%2Ceditable_content%2Cvoteup_count%2Creshipment_settings%2Ccomment_permission%2Ccreated_time%2Cupdated_time%2Creview_info%2Crelevant_info%2Cquestion%2Cexcerpt%2Crelationship.is_authorized%2Cis_author%2Cvoting%2Cis_thanked%2Cis_nothelp%2Cis_labeled%2Cis_recognized%2Cpaid_info%2Cpaid_info_content%3Bdata%5B%2A%5D.mark_infos%5B%2A%5D.url%3Bdata%5B%2A%5D.author.follower_count%2Cbadge%5B%2A%5D.topics&limit=5&offset={num}&platform=desktop&sort_by=default'
+        )
+
         data_json = requests.get(json_url,headers=headers)
         all_detail_data = data_json.json()['data']
         length_detail_data = len(all_detail_data)
@@ -48,7 +53,6 @@ def data_json_request(question_id,question_title,headers):
             # 保存数据至数据库
             db = pymysql.connect(host='localhost',user='root',password='123456',port=3306,db='spider_data')
             cursor = db.cursor()
-            sql = 'INSERT INTO zhihu_hot_question(question_title,author_name,author_introduce,author_followers,answer_vote_num,answer_comment_num,updated_time,content) VALUES(%s,%s,%s,%s,%s,%s,%s,%s)'
             try:
                 if int(answer_vote_num) >= 90:
                     cursor.execute(sql,(question_title,answer_author,author_introduce,author_followers,answer_vote_num,answer_comment_num,updated_time,content))
@@ -59,8 +63,8 @@ def data_json_request(question_id,question_title,headers):
             except:
                 print('数据写入失败！')
                 db.rollback()
-            # print(question_title,'\n',answer_author,'\n',author_introduce,'\n',author_followers,'\n',answer_vote_num,'\n',answer_comment_num
-            # ,'\n',updated_time,'\n',content)
+                    # print(question_title,'\n',answer_author,'\n',author_introduce,'\n',author_followers,'\n',answer_vote_num,'\n',answer_comment_num
+                    # ,'\n',updated_time,'\n',content)
         num = i*5
         i = i+1
         if length_detail_data == 0:
@@ -76,7 +80,7 @@ def data_json_request(question_id,question_title,headers):
 def main():
     question_id = get_question_num(url,headers)
     print(question_id)
-    print('当前环境CPU核数是：{}核'.format(multiprocessing.cpu_count()))
+    print(f'当前环境CPU核数是：{multiprocessing.cpu_count()}核')
     p = multiprocessing.Pool(4)
     for q_id in question_id:
         p.apply_async(data_json_request,args=(q_id[0],q_id[1],headers))

@@ -42,9 +42,9 @@ class VehicleStyleSpider(scrapy.Spider):
         if kou_bei_detail_url is not None:
             for url in kou_bei_detail_url:
                 # print(url)
-                url = "https:" + url
+                url = f"https:{url}"
                 yield scrapy.Request(url=url, callback=self.parse_vehicle_detail_infos, meta={'item': item})
-                # yield response.follow(url, self.parse_vehicle_detail_infos)
+                        # yield response.follow(url, self.parse_vehicle_detail_infos)
         if kou_bei_next_url is not None:
             yield response.follow(kou_bei_next_url, self.parse_vehicle_detail)
 
@@ -115,7 +115,8 @@ class VehicleStyleSpider(scrapy.Spider):
             print(response.url)
             seller_id = choose_dl[2].xpath(".//a/@data-val").get()
             data_evalid = choose_dl[2].xpath(".//a/@data-evalid").get()
-            seller_api_url = "https://k.autohome.com.cn/frontapi/GetDealerInfor?dearerandspecIdlist=" + seller_id + "," + data_evalid +"|"
+            seller_api_url = f"https://k.autohome.com.cn/frontapi/GetDealerInfor?dearerandspecIdlist={seller_id},{data_evalid}|"
+
             print(seller_id, data_evalid)
             print(seller_api_url)
             print("="*100)
